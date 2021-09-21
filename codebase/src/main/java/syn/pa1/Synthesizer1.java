@@ -10,6 +10,7 @@ import syn.base.AST;
 import syn.base.ASTNode;
 import syn.base.CFG;
 import syn.base.Dataframe;
+import syn.base.Production;
 import syn.base.Synthesizer;
 
 public class Synthesizer1 extends Synthesizer {
@@ -38,6 +39,29 @@ public class Synthesizer1 extends Synthesizer {
     while (!worklist.isEmpty()) {
 
       iterCounter++;
+
+      ret = worklist.removeFirst();
+
+        if(selectOpenNode(ret) == null && interp.eval(ret,inEx) != null && (interp.eval(ret, inEx)).equals(outEx)){
+          return ret;
+        }
+        else if(selectOpenNode(ret) == null && interp.eval(ret,inEx) != null && !(interp.eval(ret, inEx)).equals(outEx)){
+          continue;
+        }
+        else if(selectOpenNode(ret) == null){
+          continue;
+        }
+
+      ASTNode node = selectOpenNode(ret);
+
+      Production[] symbols = cfg.getProductions(node.getSymbol());
+
+      for(int i = 0; i < symbols.length; ++i){
+        AST temp =  ret.expand(node, symbols[i]);
+        if(temp.numOfOperators() <= bound) {
+          worklist.addLast(temp);
+        }
+      }
 
       //
       // add your code here
