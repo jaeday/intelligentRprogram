@@ -3,6 +3,7 @@ package syn.pa2;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.ArrayList;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -110,13 +111,41 @@ public class Synthesizer2 extends Synthesizer1 {
   }
 
   protected boolean attemptToPrune(AST ast) {
-    // add your code here
-    throw new RuntimeException();
+    ArrayList<ASTNode[]> list = new ArrayList<ASTNode[]>();
+    ASTNode[] temp = ast.getChildren(ast.getRoot());
+    list.add(temp);
+    while(!list.isEmpty()){
+      if(list.get(0)[0].getSymbol() != "?" && list.get(0)[1].getSymbol() == "?"){
+        if(ast.isLeaf(list.get(0)[0])){
+          return true;
+        }
+        else{
+          list.add(ast.getChildren(list.get(0)[0]));
+        }
+      }
+      list.remove(list.size()-1);
+    }
+    return false;
   }
 
   protected boolean prune(AST ast, Dataframe inEx, Dataframe outEx) {
-    // add your code here
-    throw new RuntimeException();
+      ASTNode start = ast.getBottomLeftNode();
+      ASTNode parent = ast.getParent(start);
+      String operation = parent.getSymbol();
+      operatorToSpec[operation].substitue(inEx.numOfCols(), inEx.numOfRows());
+      while(parent != null){
+        start = parent;
+        parent = ast.getParent(start);
+        operation = parent.getSymbol();
+        operatorToSpec[operation].substitue(inEx.numOfCols(), inEx.numOfRows());
+      }
+      //do ZST 
+
+    // input the elements in the temp[] to the boolExpr
+    // And everything, put everything into z3 solver
+    // return true if the result is SAT
+    // return false if the result is UNSAT
+
   }
 
 }
